@@ -19,17 +19,20 @@ class User(db.Model):
         }
 
 class Todos(db.Model):
+    __tablename__ = "todos"
     id = db.Column(db.Integer, primary_key = True)
     label = db.Column(db.String(50), nullable = False) 
     done = db.Column(db.Boolean(), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship(User)
 
     def __repr__(self):
         return f'<Todos {self.id}>'
 
     def serialize(self):
         return {
-            "id": self.id,
             "label": self.label,
             "done": self.done,
             # do not serialize the password, its a security breach
         }
+
