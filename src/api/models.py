@@ -33,6 +33,6 @@ class Todos(db.Model):
         return {
             "label": self.label,
             "done": self.done,
-            # do not serialize the password, its a security breach
+            "user_id":self.user_id,
         }
 

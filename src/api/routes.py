@@ -19,21 +19,45 @@ def handle_hello():
 
 @api.route('/todos/<int:user_param>', methods=['GET'])
 def get_todos(user_param):
-    todos=Todos.query.filter(Todos.user_id==user_param).all()
-    user_data = todos[0].user.serialize()
-    return jsonify({
-        "user":"user_data",
+    todos=Todos.query.filter(Todos.user_id==user_param).all() #Se especifica entonces que traemos todos los todos y el user_param va a ser el mismo valor que el user_id del todo
+    user_data = todos[0].user.serialize() # se trae el primer parametro de la colección que se crea en la línea de codigo de arriba
+    return jsonify({ #aquí se retorna toda la información de los todos junto a la del usuario
+        "user":user_data,
         "todos":list(map(lambda item:item.serialize(),todos))
     }), 200
 
     
-@api.route('/todos/<int:user_param>', methods=['POST'])
+@api.route('/todos/<int:user_param>', methods=['POST']) #aqui le damos la distinción a cada ruta para que los todos sean independientes para cada usuario
 def post_todo(user_param):
+    label = request.json.get("label") #aqui se define que información es la cual se va a cargar cuando se haga el post en la aplicación
+    done = request.json.get("done") #aqui se define que información es la cual se va a cargar cuando se haga el post en la aplicación
+    newTodo = Todos(user_id=user_param, label=label, done=done) #aquí se crea el newtodo
+    db.session.add(newTodo) #aquí se agrega a la base de datos
+    db.session.commit() #aquí se envia la actualización
+    return jsonify({"reply":"Todo created successfully"}), 201 #La respuesta que se muestra al momento de hacer el post, en este caso en el postman
+
+@api.route('/todos/<int:user_param>/<int:todo_index>', methods=['PUT'])
+def put_todo(user_param, todo_index):
     label = request.json.get("label")
     done = request.json.get("done")
-    newTodo = Todos(user_id=user_param, label=label, done=done)
+    todos = Todos.query.filter(Todos.user_id==user_param).all()
+    newTodo = todos[todo_index]
+    newTodo.label = label
+    newTodo.done = done
     db.session.add(newTodo)
     db.session.commit()
-    return jsonify({"reply":"Todo created successfully"}), 201
+    return jsonify({"reply":"Todo update successfully"}), 200
+
+
+@api.route('/todos/<int:user_param>/<int:todo_index>', methods=['DELETE'])
+def delete_todo(user_param, todo_index):
+    todos=Todos.query.filter(Todos.user_id==user_param).all()
+    deleteTodo = todos[todo_index]
+    db.session.delete(deleteTodo)
+    db.session.commit()
+    return jsonify({"reply":"Todo delete successfully"}), 200
+
+
+
 
 
