@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, jsonify
-from api.models import db, User, Todos
+from api.models import db, User, Favorites, Films, Planets
 from api.utils import generate_sitemap, APIException
 
 api = Blueprint('api', __name__)
@@ -17,7 +17,7 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
-@api.route('/todos/<int:user_param>', methods=['GET'])
+""" @api.route('/todos/<int:user_param>', methods=['GET'])
 def get_todos(user_param):
     todos=Todos.query.filter(Todos.user_id==user_param).all() #Se especifica entonces que traemos todos los todos y el user_param va a ser el mismo valor que el user_id del todo
     user_data = todos[0].user.serialize() # se trae el primer parametro de la colección que se crea en la línea de codigo de arriba
@@ -55,7 +55,25 @@ def delete_todo(user_param, todo_index):
     deleteTodo = todos[todo_index]
     db.session.delete(deleteTodo)
     db.session.commit()
-    return jsonify({"reply":"Todo delete successfully"}), 200
+    return jsonify({"reply":"Todo delete successfully"}), 200 """
+
+
+@api.route('/favorites/<int:user_param>', methods=['GET'])
+def get_favorites(user_param):
+    favorites = Favorites.query.filter(Favorites.user_id == user_param).all()
+    favorite_list = []
+    for_range = len(favorites)
+
+    
+    for i in range(for_range):
+        
+        if favorites[i].favorite_type == 'planets':
+            favorites_planet = Planets.query.get(favorites[i].favorite_id)
+            favorites[i].serialize()["data"] = favorites_planet.serialize()
+
+    return jsonify(favorite_list)
+    
+    #list(map(lambda favorite: favorite.serialize(), favorites)), 200
 
 
 
