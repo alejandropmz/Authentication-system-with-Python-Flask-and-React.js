@@ -69,7 +69,9 @@ def get_favorites(user_param):
         
         if favorites[i].favorite_type == 'planets':
             favorites_planet = Planets.query.get(favorites[i].favorite_id)
-            favorites[i].serialize()["data"] = favorites_planet.serialize()
+            if favorites_planet != None:
+                favorites[i].serialize()["data"] = favorites_planet.serialize()
+                favorite_list.append(favorites[i].serialize())
 
     return jsonify(favorite_list)
     
