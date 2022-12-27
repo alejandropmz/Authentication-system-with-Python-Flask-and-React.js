@@ -16,10 +16,11 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
+            "active": self.is_active
             # do not serialize the password, its a security breach
         }
 
-class Todos(db.Model):
+""" class Todos(db.Model):
     __tablename__ = "todos"
     id = db.Column(db.Integer, primary_key = True)
     label = db.Column(db.String(50), nullable = False) 
@@ -35,7 +36,7 @@ class Todos(db.Model):
             "label": self.label,
             "done": self.done,
             "user_id":self.user_id,
-        }
+        } """
 
 class Films(db.Model):
     __tablename__ = "films"
@@ -54,6 +55,8 @@ class Films(db.Model):
             "title": self.title,
             "director": self.director,
             "producer": self.producer,
+            "release_date": self.release_date,
+            "episode_id": self.episode_id,
             
         }
 
@@ -76,7 +79,7 @@ class People(db.Model):
             "gender": self.gender,
             "height": self.height,
             "skin_color": self.skin_color,
-            "eye_color": self.eye_color,
+            "eyes_color": self.eyes_color,
             "birth_year": self.birth_year,
             
         }
@@ -96,6 +99,7 @@ class Planets(db.Model):
 
     def serialize(self):
         return {
+            "id": self.id,
             "name": self.name,
             "diameter": self.diameter,
             "gravity": self.gravity,
@@ -110,9 +114,9 @@ class Species(db.Model):
     __tablename__ = "species"
     id = db.Column(db.Integer, primary_key = True)
     classification = db.Column(db.String(50), nullable = False)
-    designation = db.Column(db.Integer, nullable = False)
-    languaje = db.Column(db.Integer, nullable = False)
-    skin = db.Column(db.Integer, nullable = False)
+    designation = db.Column(db.String(100), nullable = False)
+    languaje = db.Column(db.String(100), nullable = False)
+    skin = db.Column(db.String(100), nullable = False)
     eye_color = db.Column(db.String(50), nullable = False)
     average_lifespan = db.Column(db.Integer, nullable = False)
 
@@ -134,10 +138,10 @@ class Starships(db.Model):
     __tablename__ = "starships"
     id = db.Column(db.Integer, primary_key = True)
     model = db.Column(db.String(50), nullable = False)
-    manufacturer = db.Column(db.Integer, nullable = False)
+    manufacturer = db.Column(db.String(100), nullable = False)
     lenght = db.Column(db.Integer, nullable = False)
     cargo_capacity = db.Column(db.Integer, nullable = False)
-    consumables = db.Column(db.String(50), nullable = False)
+    consumables = db.Column(db.Integer, nullable = False)
     max_atmosphering_speed = db.Column(db.Integer, nullable = False)
 
     def __repr__(self):
@@ -158,10 +162,10 @@ class Vehicles(db.Model):
     __tablename__ = "vehicles"
     id = db.Column(db.Integer, primary_key = True)
     model = db.Column(db.String(50), nullable = False)
-    manufacturer = db.Column(db.Integer, nullable = False)
+    manufacturer = db.Column(db.String(100), nullable = False) 
     lenght = db.Column(db.Integer, nullable = False)
     cargo_capacity = db.Column(db.Integer, nullable = False)
-    consumables = db.Column(db.String(50), nullable = False)
+    consumables = db.Column(db.Integer, nullable = False) 
 
     def __repr__(self):
         return f'<Vehicles {self.id}>'
@@ -192,5 +196,6 @@ class Favorites(db.Model):
         return {
             "id": self.id,
             "favorite_type": self.favorite_type,
-            "favorite_id": self.favorite_id,            
+            "favorite_id": self.favorite_id,
+            "user":self.user.serialize()         
         }
