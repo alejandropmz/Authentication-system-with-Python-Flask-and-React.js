@@ -76,6 +76,33 @@ def users():
         "msg":"No have any user"
     })
 
+# EACH USER
+
+@api.route('/users/<int:user>/', methods=['GET'])
+def each_user(user):
+    user = User.query.filter(User.id == user).all()
+    each_user = user[0].serialize()
+
+    return jsonify({
+        "user":each_user
+    }), 200
+
+# DELETE USER
+
+@api.route('/users/<int:user>/', methods=['DELETE'])
+def delete_user(user):
+    users = User.query.filter(User.id == user).all()
+    delete = users[0]
+    db.session.delete(delete)
+    db.session.commit()
+    if len(users) > 0: # error en esta condición, no funciona cuando no hay elementos que eliminar
+        return jsonify({
+            "msg":"User delete successfully"
+            }), 200
+    
+    return jsonify({
+        "msg":"No have users to delete" 
+    })
 
 # ALL FAVORITES
 
@@ -87,18 +114,24 @@ def favorites():
     for i in range(len(favorites)):
         all_favorites.append(favorites[i].serialize())
         
+    if len(all_favorites) > 0:
+
+        return jsonify({
+            "All favorites":all_favorites
+        }), 200
+
     return jsonify({
-        "All favorites":all_favorites
-    }), 200
+        "msg":"No have nay favorite"
+    })
     
 
 
 
 # EACH FAVORITES
 
-@api.route('/favorites/<int:user_param>', methods=['GET']) # Metodo get el cual se va a traer la data de los models, y crea la ruta para los favorites
+@api.route('/favorites/<int:user_param>', methods=['GET'])
 def get_user_favorite(user_param): 
-    favorites = Favorites.query.filter(Favorites.user_id == user_param).all() #trae la información con el id que sea igual al parametro que se pasa en la función
+    favorites = Favorites.query.filter(Favorites.user_id == user_param).all()
     favorite_list = []
     for_range = len(favorites)
 
@@ -141,6 +174,41 @@ def get_user_favorite(user_param):
     
     #list(map(lambda favorite: favorite.serialize(), favorites)), 200
 
+# DELETE FAVORITE
+
+@api.route('/favorites/<int:favorite>/', methods=['DELETE'])
+def delete_favorite(favorite):
+    favorites = Favorites.query.filter(Favorites.id == favorite).all()
+    delete = favorites[0]
+    db.session.delete(delete)
+    db.session.commit()
+    if len(favorites) > 0: # error en esta condición, no funciona cuando no hay elementos que eliminar
+        return jsonify({
+            "msg":"Favorite delete successfully"
+            }), 200
+    
+    return jsonify({
+        "msg":"No have favorites to delete" 
+    })
+
+
+# POST NEW FAVORITE ############################################
+
+@api.route('/favorites/films/<int:film>/', methods=['POST']) # no terminada
+def post_favorite(film):
+    favorite_type = request.json.get("favorite_type")
+    favorite_id = request.json.get("favorite_id")
+    post_favorite = Favorites(favorite_type = favorite_type, favorite_id = favorite_id)
+    db.session.add(post_favorite)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Favorite film create succefully",
+        "film":add_film
+    }), 200
+
+#/favorite/people/<int:planet_id>
+
 
 # ALL FILMS
 
@@ -157,6 +225,7 @@ def films():
         return jsonify({
             "All films":all_films
         }), 200
+
     return jsonify({
         "msg":"No have any film"
     })
@@ -178,6 +247,25 @@ def each_film(film):
     })
 
 
+# DELETE FILM
+
+@api.route('/films/<int:film>/', methods=['DELETE'])
+def delete_film(film):
+    films = Films.query.filter(Films.id == film).all()
+    delete = films[0]
+    db.session.delete(delete)
+    db.session.commit()
+
+    if len(films) > 0:
+
+        return jsonify({
+            "msg":"Film delete successfully"
+        })
+    
+    return jsonify({
+        "msg":"Not have film to delete"
+    })
+
 # ALL PEOPLE
 
 @api.route('/people/')
@@ -192,6 +280,7 @@ def people():
         return jsonify({
             "All people":all_people
         }), 200
+
     return jsonify({
         "msg":"No have any people"
     })
@@ -204,7 +293,7 @@ def each_people(peop):
     people = People.query.filter(People.id == peop).all()
     each_people = people[0].serialize()
 
-    if peop <= len(people)+1:
+    if peop <= len(people)+1: # Verificar para solventar esta condición
         return jsonify({
             "people":each_people
         }), 200
@@ -213,6 +302,25 @@ def each_people(peop):
         "msg":"people not found"
     })
 
+
+# DELETE PEOPLE
+
+@api.route('/people/<int:peop>/', methods=['DELETE'])
+def delete_people(peop):
+    people = People.query.filter(People.id == peop).all()
+    delete = people[0]
+    db.session.delete(delete)
+    db.session.commit()
+
+    if len(people) > 0:
+
+        return jsonify({
+            "msg":"people delete successfully"
+        })
+    
+    return jsonify({
+        "msg":"Not have people to delete"
+    })
 
 # ALL PLANETS
 
@@ -239,13 +347,32 @@ def each_planet(planet):
     planets = Planets.query.filter(Planets.id == planet).all()
     each_planet = planets[0].serialize()
 
-    if planet <= len(planets)+1:
+    if planet <= len(planets)+1: # Verificar para solventar esta condición
         return jsonify({
             "planet":each_planet
         }), 200
     
     return jsonify({
         "msg":"planet not found"
+    })
+
+# DELETE PLANET
+
+@api.route('/planets/<int:planet>/', methods=['DELETE'])
+def delete_planet(planet):
+    planets = Planets.query.filter(Planets.id == planet).all()
+    delete = planets[0]
+    db.session.delete(delete)
+    db.session.commit()
+
+    if len(planets) > 0:
+
+        return jsonify({
+            "msg":"planet delete successfully"
+        })
+    
+    return jsonify({
+        "msg":"Not have planet to delete"
     })
 
 
@@ -275,13 +402,32 @@ def each_specie(specie):
     species = Species.query.filter(Species.id == specie).all()
     each_specie = species[0].serialize()
 
-    if specie <= len(species)+1:
+    if specie <= len(species)+1: # Verificar para solventar esta condición
         return jsonify({
             "specie":each_specie
         }), 200
     
     return jsonify({
         "msg":"specie not found"
+    })
+
+# DELETE SPECIE
+
+@api.route('/species/<int:specie>/', methods=['DELETE'])
+def delete_specie(specie):
+    species = Species.query.filter(Species.id == specie).all()
+    delete = species[0]
+    db.session.delete(delete)
+    db.session.commit()
+
+    if len(species) > 0:
+
+        return jsonify({
+            "msg":"specie delete successfully"
+        })
+    
+    return jsonify({
+        "msg":"Not have specie to delete"
     })
 
 # ALL STARSHIPS
@@ -309,13 +455,32 @@ def each_starship(starship):
     starships = Starships.query.filter(Starships.id == starship).all()
     each_starship = starships[0].serialize()
 
-    if starship <= len(starships)+1:
+    if starship <= len(starships)+1: # Verificar para solventar esta condición
         return jsonify({
             "starship":each_starship
         }), 200
     
     return jsonify({
         "msg":"starship not found"
+    })
+
+# DELETE FILM
+
+@api.route('/starships/<int:starship>/', methods=['DELETE'])
+def delte_starship(starship):
+    starships = Starships.query.filter(Starships.id == starship).all()
+    delete = starships[0]
+    db.session.delete(delete)
+    db.session.commit()
+
+    if len(starships) > 0:
+
+        return jsonify({
+            "msg":"starship delete successfully"
+        })
+    
+    return jsonify({
+        "msg":"Not have starship to delete"
     })
 
 
@@ -333,6 +498,7 @@ def vehicles():
         return jsonify({
             "All vehicles":all_vehicles
         }), 200
+
     return jsonify({
         "msg":"no have any vehicle"
     })
@@ -345,7 +511,7 @@ def each_vehicle(vehicle):
     vehicles = Vehicles.query.filter(Vehicles.id == vehicle).all()
     each_vehicle = vehicles[0].serialize()
 
-    if vehicle <= len(vehicles)+1:
+    if vehicle <= len(vehicles)+1: # Verificar para solventar esta condición
         return jsonify({
             "vehicle":each_vehicle
         }), 200
@@ -353,6 +519,27 @@ def each_vehicle(vehicle):
     return jsonify({
         "msg":"vehicle not found"
     })
+
+# DELETE VEHICLES
+
+@api.route('/vehicles/<int:vehicle>/', methods=['DELETE'])
+def delete_vehicle(vehicle):
+    vehicles = Vehicles.query.filter(Vehicles.id == vehicle).all()
+    delete = vehicles[0]
+    db.session.delete(delete)
+    db.session.commit()
+
+    if len(vehicles) > 0:
+
+        return jsonify({
+            "msg":"vehicle delete successfully"
+        })
+    
+    return jsonify({
+        "msg":"Not have vehicle to delete"
+    })
+
+
 
 
 

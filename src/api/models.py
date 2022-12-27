@@ -52,6 +52,7 @@ class Films(db.Model):
 
     def serialize(self):
         return {
+            "id": self.id,
             "title": self.title,
             "director": self.director,
             "producer": self.producer,
@@ -75,6 +76,7 @@ class People(db.Model):
 
     def serialize(self):
         return {
+            "id":self.id,
             "name": self.name,
             "gender": self.gender,
             "height": self.height,
@@ -149,6 +151,7 @@ class Starships(db.Model):
 
     def serialize(self):
         return {
+            "id":self.id,
             "model": self.model,
             "manufacturer": self.manufacturer,
             "lenght": self.lenght,
@@ -172,6 +175,7 @@ class Vehicles(db.Model):
 
     def serialize(self):
         return {
+            "id":self.id,
             "model": self.model,
             "manufacturer": self.manufacturer,
             "lenght": self.lenght,
@@ -196,6 +200,5 @@ class Favorites(db.Model):
         return {
             "id": self.id,
             "favorite_type": self.favorite_type,
-            "favorite_id": self.favorite_id,
-            "user":self.user.serialize()         
+            "favorite_id": self.favorite_id     
         }
