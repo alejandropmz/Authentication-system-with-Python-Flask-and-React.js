@@ -7,6 +7,8 @@ from api.utils import generate_sitemap, APIException
 
 api = Blueprint('api', __name__)
 
+# 4 funciones genericas para el crud : 1 para post, 1 para el get, otra el delete, y put 
+
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -16,46 +18,6 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
-
-""" @api.route('/todos/<int:user_param>', methods=['GET'])
-def get_todos(user_param):
-    todos=Todos.query.filter(Todos.user_id==user_param).all() #Se especifica entonces que traemos todos los todos y el user_param va a ser el mismo valor que el user_id del todo
-    user_data = todos[0].user.serialize() # se trae el primer parametro de la colección que se crea en la línea de codigo de arriba
-    return jsonify({ #aquí se retorna toda la información de los todos junto a la del usuario
-        "user":user_data,
-        "todos":list(map(lambda item:item.serialize(),todos))
-    }), 200
-
-    
-@api.route('/todos/<int:user_param>', methods=['POST']) #aqui le damos la distinción a cada ruta para que los todos sean independientes para cada usuario
-def post_todo(user_param):
-    label = request.json.get("label") #aqui se define que información es la cual se va a cargar cuando se haga el post en la aplicación
-    done = request.json.get("done") #aqui se define que información es la cual se va a cargar cuando se haga el post en la aplicación
-    newTodo = Todos(user_id=user_param, label=label, done=done) #aquí se crea el newtodo
-    db.session.add(newTodo) #aquí se agrega a la base de datos
-    db.session.commit() #aquí se envia la actualización
-    return jsonify({"reply":"Todo created successfully"}), 201 #La respuesta que se muestra al momento de hacer el post, en este caso en el postman
-
-@api.route('/todos/<int:user_param>/<int:todo_index>', methods=['PUT'])
-def put_todo(user_param, todo_index):
-    label = request.json.get("label")
-    done = request.json.get("done")
-    todos = Todos.query.filter(Todos.user_id==user_param).all()
-    newTodo = todos[todo_index]
-    newTodo.label = label
-    newTodo.done = done
-    db.session.add(newTodo)
-    db.session.commit()
-    return jsonify({"reply":"Todo update successfully"}), 200
-
-
-@api.route('/todos/<int:user_param>/<int:todo_index>', methods=['DELETE'])
-def delete_todo(user_param, todo_index):
-    todos=Todos.query.filter(Todos.user_id==user_param).all()
-    deleteTodo = todos[todo_index]
-    db.session.delete(deleteTodo)
-    db.session.commit()
-    return jsonify({"reply":"Todo delete successfully"}), 200 """
 
 # ALL USERS
 
@@ -91,18 +53,18 @@ def each_user(user):
 
 @api.route('/users/<int:user>/', methods=['DELETE'])
 def delete_user(user):
-    users = User.query.filter(User.id == user).all()
-    delete = users[0]
-    db.session.delete(delete)
-    db.session.commit()
-    if len(users) > 0: # error en esta condición, no funciona cuando no hay elementos que eliminar
+    users = User.query.filter(User.id == user).first()
+    if users is None: # Si no existen usuario entonces imprime el msj que no hay
         return jsonify({
-            "msg":"User delete successfully"
-            }), 200
+            "msg":"Not have users to delete"
+            }), 404
+
+    db.session.delete(users) # Si se salta la condición porque si hay usuarios entonces hace el delete y el commit
+    db.session.commit()
     
     return jsonify({
-        "msg":"No have users to delete" 
-    })
+        "msg":"User delete successfully"  # e imprime el msj
+    }), 201
 
 # ALL FAVORITES
 
@@ -171,25 +133,24 @@ def get_user_favorite(user_param):
         favorite_list.append(favorites[i].serialize())
 
     return jsonify(favorite_list)
-    
-    #list(map(lambda favorite: favorite.serialize(), favorites)), 200
+
 
 # DELETE FAVORITE
 
 @api.route('/favorites/<int:favorite>/', methods=['DELETE'])
 def delete_favorite(favorite):
-    favorites = Favorites.query.filter(Favorites.id == favorite).all()
-    delete = favorites[0]
-    db.session.delete(delete)
-    db.session.commit()
-    if len(favorites) > 0: # error en esta condición, no funciona cuando no hay elementos que eliminar
+    favorites = Favorites.query.filter(Favorites.id == favorite).first()
+    if favorites is None:
         return jsonify({
-            "msg":"Favorite delete successfully"
-            }), 200
+            "msg":"Not have favorites to delete"
+            }), 404
+
+    db.session.delete(favorites)
+    db.session.commit()
     
     return jsonify({
-        "msg":"No have favorites to delete" 
-    })
+        "msg":"Favorite delete successfully" 
+    }), 201
 
 
 # POST NEW FAVORITE ############################################
@@ -234,37 +195,36 @@ def films():
 
 @api.route('/films/<int:film>/', methods=['GET'])
 def each_film(film):
-    films = Films.query.filter(Films.id == film).all()
-    each_film = films[0].serialize()
+    films = Films.query.filter(Films.id == film).first()
     
-    if film <= len(films)+1:
-        return jsonify({
-            "film":each_film
-        }), 200
-    
-    return jsonify({ # Verificar para solventar esta condición
-        "film":"Film not found"
-    })
+    if films is None:
+        return jsonify({ # Verificar para solventar esta condición
+            "film":"Film not found"
+        }), 404
+
+    return jsonify({
+            "film":films
+        }), 201
 
 
 # DELETE FILM
 
 @api.route('/films/<int:film>/', methods=['DELETE'])
 def delete_film(film):
-    films = Films.query.filter(Films.id == film).all()
-    delete = films[0]
-    db.session.delete(delete)
-    db.session.commit()
+    films = Films.query.filter(Films.id == film).first()
 
-    if len(films) > 0:
+    if films is None:
 
         return jsonify({
-            "msg":"Film delete successfully"
-        })
+            "msg":"Not have film to delete"
+        }), 404
+
+    db.session.delete(films)
+    db.session.commit()
     
     return jsonify({
-        "msg":"Not have film to delete"
-    })
+        "msg":"Film delete successfully"
+    }), 201
 
 # ALL PEOPLE
 
@@ -290,37 +250,36 @@ def people():
 
 @api.route('/people/<int:peop>/', methods=['GET'])
 def each_people(peop):
-    people = People.query.filter(People.id == peop).all()
-    each_people = people[0].serialize()
+    people = People.query.filter(People.id == peop).first()
 
-    if peop <= len(people)+1: # Verificar para solventar esta condición
+    if people is None:
         return jsonify({
-            "people":each_people
-        }), 200
+            "msg":"people not found"
+        }), 404
 
     return jsonify({
-        "msg":"people not found"
-    })
+            "people":people
+        }), 201
 
 
 # DELETE PEOPLE
 
 @api.route('/people/<int:peop>/', methods=['DELETE'])
 def delete_people(peop):
-    people = People.query.filter(People.id == peop).all()
-    delete = people[0]
-    db.session.delete(delete)
-    db.session.commit()
+    people = People.query.filter(People.id == peop).first()
 
-    if len(people) > 0:
+    if people is None:
 
         return jsonify({
-            "msg":"people delete successfully"
-        })
+            "msg":"Not have people to delete"
+        }), 404
     
+    db.session.delete(people)
+    db.session.commit()
+
     return jsonify({
-        "msg":"Not have people to delete"
-    })
+        "msg":"people delete successfully"
+    }), 201
 
 # ALL PLANETS
 
@@ -360,20 +319,20 @@ def each_planet(planet):
 
 @api.route('/planets/<int:planet>/', methods=['DELETE'])
 def delete_planet(planet):
-    planets = Planets.query.filter(Planets.id == planet).all()
-    delete = planets[0]
-    db.session.delete(delete)
-    db.session.commit()
+    planets = Planets.query.filter(Planets.id == planet).first()
 
-    if len(planets) > 0:
+    if planets is None:
 
         return jsonify({
-            "msg":"planet delete successfully"
-        })
+            "msg":"Not have planet to delete"
+        }), 404
+
+    db.session.delete(planets)
+    db.session.commit()
     
     return jsonify({
-        "msg":"Not have planet to delete"
-    })
+        "msg":"planet delete successfully"
+    }), 201
 
 
 # ALL SPECIES
@@ -415,20 +374,20 @@ def each_specie(specie):
 
 @api.route('/species/<int:specie>/', methods=['DELETE'])
 def delete_specie(specie):
-    species = Species.query.filter(Species.id == specie).all()
-    delete = species[0]
-    db.session.delete(delete)
-    db.session.commit()
+    species = Species.query.filter(Species.id == specie).first()
 
-    if len(species) > 0:
+    if species is None:
 
         return jsonify({
-            "msg":"specie delete successfully"
-        })
+            "msg":"Not have specie to delete"
+        }), 404
     
+    db.session.delete(species)
+    db.session.commit()
+
     return jsonify({
-        "msg":"Not have specie to delete"
-    })
+        "msg":"specie delete successfully"
+    }), 201
 
 # ALL STARSHIPS
 
@@ -464,24 +423,24 @@ def each_starship(starship):
         "msg":"starship not found"
     })
 
-# DELETE FILM
+# DELETE STARSHIP
 
 @api.route('/starships/<int:starship>/', methods=['DELETE'])
 def delte_starship(starship):
-    starships = Starships.query.filter(Starships.id == starship).all()
-    delete = starships[0]
-    db.session.delete(delete)
-    db.session.commit()
+    starships = Starships.query.filter(Starships.id == starship).first()
 
-    if len(starships) > 0:
+    if starships is None:
 
         return jsonify({
-            "msg":"starship delete successfully"
-        })
+            "msg":"Not have starship to delete"
+        }), 404
+
+    db.session.delete(starships)
+    db.session.commit()
     
     return jsonify({
-        "msg":"Not have starship to delete"
-    })
+        "msg":"starship delete successfully"
+    }), 201
 
 
 # ALL VEHICLES
@@ -524,24 +483,22 @@ def each_vehicle(vehicle):
 
 @api.route('/vehicles/<int:vehicle>/', methods=['DELETE'])
 def delete_vehicle(vehicle):
-    vehicles = Vehicles.query.filter(Vehicles.id == vehicle).all()
-    delete = vehicles[0]
-    db.session.delete(delete)
-    db.session.commit()
+    vehicles = Vehicles.query.filter(Vehicles.id == vehicle).first()
 
-    if len(vehicles) > 0:
+    if vehicles is None:
 
         return jsonify({
-            "msg":"vehicle delete successfully"
-        })
+            "msg":"Not have vehicles to delete"
+        }), 404
+
+    db.session.delete(vehicles)
+    db.session.commit()
     
     return jsonify({
-        "msg":"Not have vehicle to delete"
-    })
+        "msg":"vehicle delete successfully"
+    }), 201
 
-
-
-
+    # 
 
 
 
@@ -566,6 +523,45 @@ def delete_vehicle(vehicle):
         }) """
 
 
+""" @api.route('/todos/<int:user_param>', methods=['GET'])
+def get_todos(user_param):
+    todos=Todos.query.filter(Todos.user_id==user_param).all() #Se especifica entonces que traemos todos los todos y el user_param va a ser el mismo valor que el user_id del todo
+    user_data = todos[0].user.serialize() # se trae el primer parametro de la colección que se crea en la línea de codigo de arriba
+    return jsonify({ #aquí se retorna toda la información de los todos junto a la del usuario
+        "user":user_data,
+        "todos":list(map(lambda item:item.serialize(),todos))
+    }), 200
+
+    
+@api.route('/todos/<int:user_param>', methods=['POST']) #aqui le damos la distinción a cada ruta para que los todos sean independientes para cada usuario
+def post_todo(user_param):
+    label = request.json.get("label") #aqui se define que información es la cual se va a cargar cuando se haga el post en la aplicación
+    done = request.json.get("done") #aqui se define que información es la cual se va a cargar cuando se haga el post en la aplicación
+    newTodo = Todos(user_id=user_param, label=label, done=done) #aquí se crea el newtodo
+    db.session.add(newTodo) #aquí se agrega a la base de datos
+    db.session.commit() #aquí se envia la actualización
+    return jsonify({"reply":"Todo created successfully"}), 201 #La respuesta que se muestra al momento de hacer el post, en este caso en el postman
+
+@api.route('/todos/<int:user_param>/<int:todo_index>', methods=['PUT'])
+def put_todo(user_param, todo_index):
+    label = request.json.get("label")
+    done = request.json.get("done")
+    todos = Todos.query.filter(Todos.user_id==user_param).all()
+    newTodo = todos[todo_index]
+    newTodo.label = label
+    newTodo.done = done
+    db.session.add(newTodo)
+    db.session.commit()
+    return jsonify({"reply":"Todo update successfully"}), 200
+
+
+@api.route('/todos/<int:user_param>/<int:todo_index>', methods=['DELETE'])
+def delete_todo(user_param, todo_index):
+    todos=Todos.query.filter(Todos.user_id==user_param).all()
+    deleteTodo = todos[todo_index]
+    db.session.delete(deleteTodo)
+    db.session.commit()
+    return jsonify({"reply":"Todo delete successfully"}), 200 """
 
 
 

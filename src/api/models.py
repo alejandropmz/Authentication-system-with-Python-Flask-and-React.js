@@ -127,6 +127,7 @@ class Species(db.Model):
 
     def serialize(self):
         return {
+            "id":self.id,
             "classification": self.classification,
             "designation": self.designation,
             "languaje": self.languaje,
@@ -189,7 +190,7 @@ class Favorites(db.Model):
     __tablename__ = "favorites"
     id = db.Column(db.Integer, primary_key = True)
     favorite_type = db.Column(db.String(50), nullable = False)
-    favorite_id = db.Column(db.Integer, nullable = False)
+    element_id = db.Column(db.Integer, nullable = False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship(User)
 
@@ -197,8 +198,30 @@ class Favorites(db.Model):
         return f'<Favorites {self.id}>'
 
     def serialize(self):
+
+        #Esta parte me muestra la info de el elemento que se encuentre marcado como favorito
+
+        if self.favorite_type == "films":
+            elements = Films.query.filter(Films.id == self.element_id).first()
+
+        elif self.favorite_type == "people": 
+            elements = People.query.filter(People.id == self.element_id).first()
+
+        elif self.favorite_type == "planets": 
+            elements = Planets.query.filter(Planets.id == self.element_id).first()
+
+        elif self.favorite_type == "species": 
+            elements = Species.query.filter(Species.id == self.element_id).first()
+        
+        elif self.favorite_type == "starships": 
+            elements = Starships.query.filter(Starships.id == self.element_id).first()
+
+        elif self.favorite_type == "vehicles": 
+            elements = Vehicles.query.filter(Vehicles.id == self.element_id).first()
+
         return {
             "id": self.id,
             "favorite_type": self.favorite_type,
-            "favorite_id": self.favorite_id     
+            "user":self.user.email,
+            "element": elements.serialize()
         }
