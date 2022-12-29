@@ -49,12 +49,57 @@ def each_user(user):
         "user":each_user
     }), 200
 
+# POST NEW USER
+
+@api.route('/users/', methods=['POST'])
+def post_user():
+    email = request.json.get("email")
+    password = request.json.get("password")
+    is_active = request.json.get("is_active")
+    post_user = User(email = email, password = password, is_active = is_active)
+    users = User.query.filter(User.email == email).first()
+    all_users = User.query.filter(User.__tablename__ == "user").all()
+
+
+    if not users is None:
+        return jsonify({
+            "msg":"The user already exist"
+        }), 404
+        
+    db.session.add(post_user)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"User create succefully",
+        "new user":all_users[len(all_users)-1].serialize()
+    }), 201
+
+# DELETE ALL USERS
+
+@api.route('/users/', methods=['DELETE'])
+def delete_all_users():
+    users = User.query.filter(User.__tablename__ == "user").all()
+
+    if len(users) == 0:
+
+        return jsonify({
+            "msg":"Not have any users to delete"
+        }), 404
+
+    for i in range(len(users)):
+        db.session.delete(users[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all users deleted"
+    }), 201
+
 # DELETE USER
 
 @api.route('/users/<int:user>/', methods=['DELETE'])
 def delete_user(user):
     users = User.query.filter(User.id == user).first()
-    if users is None: # Si no existen usuario entonces imprime el msj que no hay
+    if users is None: # Si Nexisten usuario entonces imprime el msj que no hay
         return jsonify({
             "msg":"Not have users to delete"
             }), 404
@@ -83,7 +128,7 @@ def favorites():
         }), 200
 
     return jsonify({
-        "msg":"No have nay favorite"
+        "msg":"No have any favorite"
     })
     
 
@@ -134,6 +179,47 @@ def get_user_favorite(user_param):
 
     return jsonify(favorite_list)
 
+# POST NEW FAVORITE
+
+@api.route('/favorites/', methods=['POST'])
+def post_favorite():
+    favorite_type = request.json.get("favorite_type")
+    element_id = request.json.get("element_id")
+    post_favorite = Favorites(favorite_type = favorite_type, element_id = element_id)
+    favorites = Favorites.query.filter(Favorites.favorite_type == favorite_type and Favorites.element_id == element_id).first()
+
+    if not favorites is None:
+        return jsonify({
+            "msg":"Favorite already exist"
+        }), 404
+
+    db.session.add(post_favorite)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Favorite created successfully"
+    })
+
+# DELETE ALL FAVORITES
+
+@api.route('/favorites/', methods=['DELETE'])
+def delete_all_favorites():
+    favorites = Favorites.query.filter(Favorites.__tablename__ == "favorites").all()
+
+    if len(favorites) == 0:
+
+        return jsonify({
+            "msg":"Not have any favorites to delete"
+        }), 404
+
+    for i in range(len(favorites)):
+        db.session.delete(favorites[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all favorites deleted"
+    }), 201
+
 
 # DELETE FAVORITE
 
@@ -152,21 +238,6 @@ def delete_favorite(favorite):
         "msg":"Favorite delete successfully" 
     }), 201
 
-
-# POST NEW FAVORITE ############################################
-
-@api.route('/favorites/films/<int:film>/', methods=['POST']) # no terminada
-def post_favorite(film):
-    favorite_type = request.json.get("favorite_type")
-    favorite_id = request.json.get("favorite_id")
-    post_favorite = Favorites(favorite_type = favorite_type, favorite_id = favorite_id)
-    db.session.add(post_favorite)
-    db.session.commit()
-
-    return jsonify({
-        "msg":"Favorite film create succefully",
-        "film":add_film
-    }), 200
 
 #/favorite/people/<int:planet_id>
 
@@ -205,6 +276,54 @@ def each_film(film):
     return jsonify({
             "film":films
         }), 201
+
+
+# POST NEW FILM
+
+@api.route('/films/', methods=['POST'])
+def post_film():
+    title = request.json.get("title")
+    director = request.json.get("director")
+    producer = request.json.get("producer")
+    release_date = request.json.get("release_date")
+    episode_id = request.json.get("episode_id")
+    post_film = Films(title = title, director = director, producer = producer, release_date = release_date, episode_id = episode_id)
+    films = Films.query.filter(Films.title == title and Films.director == director and Films.producer == producer and Films.release_date == release_date and Films.episode_id == episode_id ).first()
+    all_films = Films.query.filter(Films.__tablename__ == "films").all()
+    
+
+    if not films is None:
+        return jsonify({
+            "msg":"Film already exist"
+        }), 404
+
+    db.session.add(post_film)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Film created successfully",
+        "New film":all_films[len(all_films)-1].serialize()
+    }), 201
+
+# DELETE ALL FILM
+
+@api.route('/films/', methods=['DELETE'])
+def delete_all_films():
+    films = Films.query.filter(Films.__tablename__ == "films").all()
+
+    if len(films) == 0:
+
+        return jsonify({
+            "msg":"Not have any films to delete"
+        }), 404
+
+    for i in range(len(films)):
+        db.session.delete(films[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all films deleted"
+    }), 201
 
 
 # DELETE FILM
@@ -262,6 +381,53 @@ def each_people(peop):
         }), 201
 
 
+# POST NEW PEOPLE
+
+@api.route('/people/', methods=['POST'])
+def post_people():
+    name = request.json.get("name")
+    gender = request.json.get("gender")
+    height = request.json.get("height")
+    skin_color = request.json.get("skin_color")
+    eyes_color = request.json.get("eyes_color")
+    birth_year = request.json.get("birth_year")
+    post_people = People(name = name, gender = gender, height = height, skin_color = skin_color, eyes_color = eyes_color, birth_year = birth_year)
+    people = People.query.filter(People.name == name and People.gender == gender and People.height == height and People.skin_color == skin_color and People.eyes_color == eyes_color and People.birth_year == birth_year).first()
+    all_people = People.query.filter(People.__tablename__ == "people").all()
+
+    if not people is None:
+        return jsonify({
+            "msg":"People already exist"
+        }), 404
+
+    db.session.add(post_people)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"People created successfully",
+        "New people":all_people[len(all_people)-1].serialize()
+    }), 201
+
+# DELETE ALL PEOPLE
+
+@api.route('/people/', methods=['DELETE'])
+def delete_all_people():
+    people = People.query.filter(People.__tablename__ == "people").all()
+
+    if len(people) == 0:
+
+        return jsonify({
+            "msg":"Not have any people to delete"
+        }), 404
+
+    for i in range(len(people)):
+        db.session.delete(people[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all species deleted"
+    }), 201
+
 # DELETE PEOPLE
 
 @api.route('/people/<int:peop>/', methods=['DELETE'])
@@ -296,12 +462,12 @@ def planets():
             "All planets":all_planets
         }), 200
     return jsonify({
-        "msg":"No have any planet"
+        "msg":"Not have any planet"
     })
 
 # EACH PLANET
 
-@api.route('/planets/<int:planet>/')
+@api.route('/planets/<int:planet>/', methods=['GET'])
 def each_planet(planet):
     planets = Planets.query.filter(Planets.id == planet).all()
     each_planet = planets[0].serialize()
@@ -314,6 +480,34 @@ def each_planet(planet):
     return jsonify({
         "msg":"planet not found"
     })
+
+# POST NEW PLANET
+
+@api.route('/planets/', methods=['POST'])
+def post_planet():
+    name = request.json.get("name")
+    diameter = request.json.get("diameter")
+    gravity = request.json.get("gravity")
+    population = request.json.get("population")
+    terrain = request.json.get("terrain")
+    climate = request.json.get("climate")
+    post_planet = Planets(name = name, diameter = diameter, gravity = gravity, population = population, terrain = terrain, climate = climate)
+    planets = Planets.query.filter(Planets.name == name and Planets.diameter == diameter and Planets.population == population and Planets.terrain == terrain and Planets.climate == climate).first()
+    all_planets = Planets.query.filter(Planets.__tablename__ == "planets").all()
+
+    if not planets is None:
+        return jsonify({
+            "msg":"Planet already exist"
+        }), 404
+
+    db.session.add(post_planet)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Planet created successfully",
+        "New planet":all_planets[len(all_planets)-1].serialize()
+    }), 201
+
 
 # DELETE PLANET
 
@@ -334,6 +528,26 @@ def delete_planet(planet):
         "msg":"planet delete successfully"
     }), 201
 
+# DELETE ALL PLANETS
+
+@api.route('/planets/', methods=['DELETE'])
+def delete_all_planets():
+    planets = Planets.query.filter(Planets.__tablename__ == "planets").all()
+
+    if len(planets) == 0:
+
+        return jsonify({
+            "msg":"Not have any planets to delete"
+        }), 404
+
+    for i in range(len(planets)):
+        db.session.delete(planets[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all species deleted"
+    }), 201
+
 
 # ALL SPECIES
 
@@ -350,7 +564,7 @@ def species():
             "All species":all_species
         }), 200
     return jsonify({
-        "msg":"no have any specie"
+        "msg":"No have any specie"
     })
 
 
@@ -369,6 +583,53 @@ def each_specie(specie):
     return jsonify({
         "msg":"specie not found"
     })
+
+# POST NEW SPECIE
+
+@api.route('/species/', methods=['POST'])
+def post_specie():
+    classification = request.json.get("classification")
+    designation = request.json.get("designation")
+    languaje = request.json.get("languaje")
+    skin = request.json.get("skin")
+    eye_color = request.json.get("eye_color")
+    average_lifespan = request.json.get("average_lifespan")
+    post_specie = Species(classification = classification, designation = designation, languaje = languaje, skin = skin, eye_color = eye_color, average_lifespan = average_lifespan)
+    species = Species.query.filter(Species.classification == classification and Species.designation == designation and Species.languaje == languaje and Species.skin == skin and Species.eye_color == eye_color and Species.average_lifespan == average_lifespan).first()
+    all_species = Species.query.filter(Species.__tablename__ == "species").all()
+
+    if not species is None:
+        return jsonify({
+            "msg":"Specie already exist"
+        }), 404
+
+    db.session.add(post_specie)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Specie created successfully",
+        "New specie":all_species[len(all_species)-1].serialize()
+    })
+
+# DELETE ALL SPECIES
+
+@api.route('/species/', methods=['DELETE'])
+def delete_all_species():
+    species = Species.query.filter(Species.__tablename__ == "species").all()
+
+    if len(species) == 0:
+
+        return jsonify({
+            "msg":"Not have any species to delete"
+        }), 404
+
+    for i in range(len(species)):
+        db.session.delete(species[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all species deleted"
+    }), 201
 
 # DELETE SPECIE
 
@@ -404,7 +665,7 @@ def starships():
             "All starships":all_starships
         }), 200
     return jsonify({
-        "msg":"no have any starship"
+        "msg":"No have any starship"
     })
 
 # EACH STARSHIP
@@ -422,6 +683,53 @@ def each_starship(starship):
     return jsonify({
         "msg":"starship not found"
     })
+
+# POST NEW STARSHIP
+
+@api.route('/starships/', methods=['POST'])
+def post_starship():
+    model = request.json.get("model")
+    manufacturer = request.json.get("manufacturer")
+    lenght = request.json.get("lenght")
+    cargo_capacity = request.json.get("cargo_capacity")
+    consumables = request.json.get("consumables")
+    max_atmosphering_speed = request.json.get("max_atmosphering_speed")
+    post_starship = Starships(model = model, manufacturer = manufacturer, lenght = lenght, cargo_capacity = cargo_capacity, consumables = consumables, max_atmosphering_speed = max_atmosphering_speed)
+    starships = Starships.query.filter(Starships.model == model and Starships.manufacturer == manufacturer and Starships.lenght == lenght and Starships.cargo_capacity == cargo_capacity and Starships.consumables == consumables and Starships.max_atmosphering_speed == max_atmosphering_speed).first()
+    all_starships = Starships.query.filter(Starships.__tablename__ == "starships").all()
+
+    if not starships is None:
+        return jsonify({
+            "msg":"Starship already exist"
+        }), 404
+
+    db.session.add(post_starship)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Starship created successfully",
+        "New Starship":all_starships[len(all_starships)-1].serialize()
+    })
+
+# DELETE ALL STARSHIPS
+
+@api.route('/starships/', methods=['DELETE'])
+def delete_all_starships():
+    starships = Starships.query.filter(Starships.__tablename__ == "starships").all()
+
+    if len(starships) == 0:
+
+        return jsonify({
+            "msg":"Not have any starships to delete"
+        }), 404
+
+    for i in range(len(starships)):
+        db.session.delete(starships[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all starships deleted"
+    }), 201
 
 # DELETE STARSHIP
 
@@ -443,6 +751,7 @@ def delte_starship(starship):
     }), 201
 
 
+
 # ALL VEHICLES
 
 @api.route('/vehicles/')
@@ -459,7 +768,7 @@ def vehicles():
         }), 200
 
     return jsonify({
-        "msg":"no have any vehicle"
+        "msg":"No have any vehicle"
     })
 
 
@@ -479,7 +788,53 @@ def each_vehicle(vehicle):
         "msg":"vehicle not found"
     })
 
-# DELETE VEHICLES
+# POST NEW VEHICLE
+
+@api.route('/vehicles/', methods=['POST'])
+def post_vehicle():
+    model = request.json.get("model")
+    manufacturer = request.json.get("manufacturer")
+    lenght = request.json.get("lenght")
+    cargo_capacity = request.json.get("cargo_capacity")
+    consumables = request.json.get("consumables")
+    post_vehicle = Vehicles(model = model, manufacturer = manufacturer, lenght = lenght, cargo_capacity = cargo_capacity, consumables = consumables)
+    vehicles = Vehicles.query.filter(Vehicles.model == model and Vehicles.manufacturer == manufacturer and Vehicles.lenght == lenght and Vehicles.cargo_capacity == cargo_capacity).first()
+    all_vehicles = Vehicles.query.filter(Vehicles.__tablename__ == "vehicles").all()
+
+    if not vehicles is None:
+        return jsonify({
+            "msg":"Vehicle already exist"
+        }), 404
+
+    db.session.add(post_vehicle)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"Vehicle created successfully",
+        "New Starship":all_vehicles[len(all_vehicles)-1].serialize()
+    }), 201
+
+# DELETE ALL VEHICLES
+
+@api.route('/vehicles/', methods=['DELETE'])
+def delete_all_vehicles():
+    vehicles = Vehicles.query.filter(Vehicles.__tablename__ == "vehicles").all()
+
+    if len(vehicles) == 0:
+
+        return jsonify({
+            "msg":"Not have any vehicles to delete"
+        }), 404
+
+    for i in range(len(vehicles)):
+        db.session.delete(vehicles[i])
+        db.session.commit()
+
+    return jsonify({
+        "msg":"all vehicles deleted"
+    }), 201
+
+# DELETE VEHICLE
 
 @api.route('/vehicles/<int:vehicle>/', methods=['DELETE'])
 def delete_vehicle(vehicle):
@@ -498,8 +853,7 @@ def delete_vehicle(vehicle):
         "msg":"vehicle delete successfully"
     }), 201
 
-    # 
-
+    
 
 
 

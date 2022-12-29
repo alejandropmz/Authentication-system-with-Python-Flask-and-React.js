@@ -222,6 +222,5 @@ class Favorites(db.Model):
         return {
             "id": self.id,
             "favorite_type": self.favorite_type,
-            "user":self.user.email,
             "element": elements.serialize()
         }
