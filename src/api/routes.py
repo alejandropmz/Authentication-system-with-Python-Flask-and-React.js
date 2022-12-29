@@ -76,8 +76,7 @@ def post_user():
     db.session.commit()
 
     return jsonify({
-        "msg":"User create succefully",
-        "new user":all_users[len(all_users)-1].serialize()
+        "msg":"User create succefully"
     }), 201
 
 # PUT USER
@@ -168,50 +167,56 @@ def favorites():
 
 
 
-# EACH FAVORITES
+# EACH FAVORITES IN USERS
 
-@api.route('/favorites/<int:user_param>', methods=['GET'])
+@api.route('/favorites/<int:user_param>/', methods=['GET'])
 def get_user_favorite(user_param): 
     favorites = Favorites.query.filter(Favorites.user_id == user_param).all()
     favorite_list = []
-    for_range = len(favorites)
+
+    if favorites is None:
+        return jsonify({
+            "msg":"No have any favorite"
+        }), 404
 
     
-    for i in range(for_range):
+    for i in range(len(favorites)):
 
         if favorites[i].favorite_type == 'films':
-            favorites_film = Films.query.get(favorites[i].favorite_id)
+            favorites_film = Films.query.get(favorites[i].element_id)
             if favorites_film != None:
                 favorites[i].serialize()["data"] = favorites_film.serialize()
 
         if favorites[i].favorite_type == 'people':
-            favorites_people = People.query.get(favorites[i].favorite_id)
+            favorites_people = People.query.get(favorites[i].element_id)
             if favorites_people != None:
                 favorites[i].serialize()["data"] = favorites_people.serialize()
         
         if favorites[i].favorite_type == 'planets':
-            favorites_planet = Planets.query.get(favorites[i].favorite_id)
+            favorites_planet = Planets.query.get(favorites[i].element_id)
             if favorites_planet != None:
                 favorites[i].serialize()["data"] = favorites_planet.serialize()
 
         if favorites[i].favorite_type == 'species':
-            favorites_species = Species.query.get(favorites[i].favorite_id)
+            favorites_species = Species.query.get(favorites[i].element_id)
             if favorites_species != None:
                 favorites[i].serialize()["data"] = favorites_species.serialize()
             
         if favorites[i].favorite_type == 'starships':
-            favorites_starships = Starships.query.get(favorites[i].favorite_id)
+            favorites_starships = Starships.query.get(favorites[i].element_id)
             if favorites_starships != None:
                 favorites[i].serialize()["data"] = favorites_starships.serialize()
 
         if favorites[i].favorite_type == 'vehicles':
-            favorites_vehicles = Vehicles.query.get(favorites[i].favorite_id)
+            favorites_vehicles = Vehicles.query.get(favorites[i].element_id)
             if favorites_vehicles != None:
                 favorites[i].serialize()["data"] = favorites_vehicles.serialize()
 
         favorite_list.append(favorites[i].serialize())
 
-    return jsonify(favorite_list)
+    return jsonify({
+        "favorites":favorite_list
+        }), 201
 
 # POST NEW FAVORITE
 
@@ -337,8 +342,7 @@ def post_film():
     db.session.commit()
 
     return jsonify({
-        "msg":"Film created successfully",
-        "New film":all_films[len(all_films)-1].serialize()
+        "msg":"Film created successfully"
     }), 201
 
 # PUT FILMS
@@ -604,8 +608,7 @@ def post_planet():
     db.session.commit()
 
     return jsonify({
-        "msg":"Planet created successfully",
-        "New planet":all_planets[len(all_planets)-1].serialize()
+        "msg":"Planet created successfully"
     }), 201
 
 # PUT PLANET
@@ -724,11 +727,11 @@ def post_specie():
     classification = request.json.get("classification")
     designation = request.json.get("designation")
     languaje = request.json.get("languaje")
-    skin = request.json.get("skin")
+    skin_color = request.json.get("skin_color")
     eye_color = request.json.get("eye_color")
     average_lifespan = request.json.get("average_lifespan")
-    post_specie = Species(classification = classification, designation = designation, languaje = languaje, skin = skin, eye_color = eye_color, average_lifespan = average_lifespan)
-    species = Species.query.filter(Species.classification == classification and Species.designation == designation and Species.languaje == languaje and Species.skin == skin and Species.eye_color == eye_color and Species.average_lifespan == average_lifespan).first()
+    post_specie = Species(classification = classification, designation = designation, languaje = languaje, skin_color = skin_color, eye_color = eye_color, average_lifespan = average_lifespan)
+    species = Species.query.filter(Species.classification == classification and Species.designation == designation and Species.languaje == languaje and Species.skin_color == skin_color and Species.eye_color == eye_color and Species.average_lifespan == average_lifespan).first()
     all_species = Species.query.filter(Species.__tablename__ == "species").all()
 
     if not species is None:
@@ -740,8 +743,7 @@ def post_specie():
     db.session.commit()
 
     return jsonify({
-        "msg":"Specie created successfully",
-        "New specie":all_species[len(all_species)-1].serialize()
+        "msg":"Specie created successfully"
     })
 
 # PUT SPECIE
@@ -751,7 +753,7 @@ def put_specie(specie_id):
     classification = request.json.get("classification")
     designation = request.json.get("designation")
     languaje = request.json.get("languaje")
-    skin = request.json.get("skin")
+    skin_color = request.json.get("skin_color")
     eye_color = request.json.get("eye_color")
     average_lifespan = request.json.get("average_lifespan")
     species = Species.query.filter(Species.id == specie_id).all()
@@ -765,7 +767,7 @@ def put_specie(specie_id):
     new_specie.classification = classification
     new_specie.designation = designation
     new_specie.languaje = languaje
-    new_specie.skin = skin
+    new_specie.skin_color = skin_color
     new_specie.eye_color = eye_color
     new_specie.average_lifespan = average_lifespan
 
@@ -873,8 +875,7 @@ def post_starship():
     db.session.commit()
 
     return jsonify({
-        "msg":"Starship created successfully",
-        "New Starship":all_starships[len(all_starships)-1].serialize()
+        "msg":"Starship created successfully"
     })
 
 # PUT STARSHIPS
@@ -1009,8 +1010,7 @@ def post_vehicle():
     db.session.commit()
 
     return jsonify({
-        "msg":"Vehicle created successfully",
-        "New Starship":all_vehicles[len(all_vehicles)-1].serialize()
+        "msg":"Vehicle created successfully"
     }), 201
 
 # PUT VEHICLE

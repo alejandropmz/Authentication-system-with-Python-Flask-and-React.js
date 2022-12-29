@@ -16,7 +16,7 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
-            "active": self.is_active
+            "is_active": self.is_active
             # do not serialize the password, its a security breach
         }
 
@@ -91,7 +91,7 @@ class Planets(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(50), nullable = False)
     diameter = db.Column(db.Integer, nullable = False)
-    gravity = db.Column(db.Integer, nullable = False)
+    gravity = db.Column(db.String(50), nullable = False)
     population = db.Column(db.Integer, nullable = False)
     terrain = db.Column(db.String(50), nullable = False)
     climate = db.Column(db.String(50), nullable = False)
@@ -118,9 +118,9 @@ class Species(db.Model):
     classification = db.Column(db.String(50), nullable = False)
     designation = db.Column(db.String(100), nullable = False)
     languaje = db.Column(db.String(100), nullable = False)
-    skin = db.Column(db.String(100), nullable = False)
+    skin_color = db.Column(db.String(100), nullable = False)
     eye_color = db.Column(db.String(50), nullable = False)
-    average_lifespan = db.Column(db.Integer, nullable = False)
+    average_lifespan = db.Column(db.Integer, nullable = False) # cambiar a string
 
     def __repr__(self):
         return f'<Species {self.id}>'
@@ -131,7 +131,7 @@ class Species(db.Model):
             "classification": self.classification,
             "designation": self.designation,
             "languaje": self.languaje,
-            "skin": self.skin,
+            "skin_color": self.skin_color,
             "eye_color": self.eye_color,
             "average_lifespan": self.average_lifespan,
             
@@ -144,7 +144,7 @@ class Starships(db.Model):
     manufacturer = db.Column(db.String(100), nullable = False)
     lenght = db.Column(db.Integer, nullable = False)
     cargo_capacity = db.Column(db.Integer, nullable = False)
-    consumables = db.Column(db.Integer, nullable = False)
+    consumables = db.Column(db.Integer, nullable = False) # cambiar a string
     max_atmosphering_speed = db.Column(db.Integer, nullable = False)
 
     def __repr__(self):
@@ -169,7 +169,7 @@ class Vehicles(db.Model):
     manufacturer = db.Column(db.String(100), nullable = False) 
     lenght = db.Column(db.Integer, nullable = False)
     cargo_capacity = db.Column(db.Integer, nullable = False)
-    consumables = db.Column(db.Integer, nullable = False) 
+    consumables = db.Column(db.Integer, nullable = False)  # cambiar a string
 
     def __repr__(self):
         return f'<Vehicles {self.id}>'
@@ -222,5 +222,7 @@ class Favorites(db.Model):
         return {
             "id": self.id,
             "favorite_type": self.favorite_type,
+            "user":self.user.email,
+            "user_id":self.user.id,
             "element": elements.serialize()
         }

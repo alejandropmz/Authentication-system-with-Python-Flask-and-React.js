@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 24116875988a
+Revision ID: 42809cca5bd5
 Revises: 
-Create Date: 2022-12-28 23:17:51.477040
+Create Date: 2022-12-29 20:50:02.048876
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '24116875988a'
+revision = '42809cca5bd5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -41,7 +41,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('diameter', sa.Integer(), nullable=False),
-    sa.Column('gravity', sa.Integer(), nullable=False),
+    sa.Column('gravity', sa.String(length=50), nullable=False),
     sa.Column('population', sa.Integer(), nullable=False),
     sa.Column('terrain', sa.String(length=50), nullable=False),
     sa.Column('climate', sa.String(length=50), nullable=False),
@@ -52,7 +52,7 @@ def upgrade():
     sa.Column('classification', sa.String(length=50), nullable=False),
     sa.Column('designation', sa.String(length=100), nullable=False),
     sa.Column('languaje', sa.String(length=100), nullable=False),
-    sa.Column('skin', sa.String(length=100), nullable=False),
+    sa.Column('skin_color', sa.String(length=100), nullable=False),
     sa.Column('eye_color', sa.String(length=50), nullable=False),
     sa.Column('average_lifespan', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
