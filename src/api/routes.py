@@ -74,6 +74,34 @@ def post_user():
         "new user":all_users[len(all_users)-1].serialize()
     }), 201
 
+# PUT USER
+
+@api.route('/users/<int:user_id>/', methods=['PUT'])
+def put_user(user_id):
+    email = request.json.get("email") # traemos todos los campos a actualizar 
+    password = request.json.get("password")
+    is_active = request.json.get("is_active")
+    user = User.query.filter(User.id == user_id).all() # traemos el usuario como lista, esto para poder hacer la comparativa en caso tal que no exista
+
+    if len(user) == 0: # si no existe entonces imprimimos el msj
+        return jsonify({
+            "msg":"User not avaliable to update"
+        }), 404
+
+    # de lo contrario entonces se actualizan los datos
+    new_user = user[0]
+    new_user.email = email
+    new_user.password = password
+    new_user.is_active = is_active
+    
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"User update successfully"
+    }), 201
+
+
 # DELETE ALL USERS
 
 @api.route('/users/', methods=['DELETE'])
@@ -200,6 +228,10 @@ def post_favorite():
         "msg":"Favorite created successfully"
     })
 
+# PUT FAVORITE ######################## HACER DE ULTIMO
+
+
+
 # DELETE ALL FAVORITES
 
 @api.route('/favorites/', methods=['DELETE'])
@@ -305,6 +337,37 @@ def post_film():
         "New film":all_films[len(all_films)-1].serialize()
     }), 201
 
+# PUT FILMS
+
+@api.route('/films/<int:film_id>/', methods=['PUT'])
+def put_film(film_id):
+    title = request.json.get("title")
+    director = request.json.get("director")
+    producer = request.json.get("producer")
+    release_date = request.json.get("release_date")
+    episode_id = request.json.get("episode_id")
+    films = Films.query.filter(Films.id == film_id).all()
+
+    if len(films) == 0:
+        return jsonify({
+            "msg":"Film not avaliable to update"
+        }), 404
+
+    new_film = films[0]
+    new_film.title = title
+    new_film.director = director
+    new_film.producer = producer
+    new_film.release_date = release_date
+    new_film.episode_id = episode_id
+
+    db.session.add(new_film)
+    db.session.commit()
+
+    return jsonify({
+        "success":"Film update successfully"
+    }), 201
+
+
 # DELETE ALL FILM
 
 @api.route('/films/', methods=['DELETE'])
@@ -408,6 +471,38 @@ def post_people():
         "New people":all_people[len(all_people)-1].serialize()
     }), 201
 
+# PUT PEOPLE
+
+@api.route('/people/<int:people_id>/', methods=['PUT'])
+def put_people(people_id):
+    name = request.json.get("name")
+    gender = request.json.get("gender")
+    height = request.json.get("height")
+    skin_color = request.json.get("skin_color")
+    eyes_color = request.json.get("eyes_color")
+    birth_year = request.json.get("birth_year")
+    people = People.query.filter(People.id == people_id).all()
+
+    if len(people) == 0:
+        return jsonify({
+            "msg":"People not avaliable to update"
+        }), 404
+
+    new_people = people[0]
+    new_people.name = name
+    new_people.gender = gender
+    new_people.height = height
+    new_people.skin_color = skin_color
+    new_people.eyes_color = eyes_color
+    new_people.birth_year = birth_year
+
+    db.session.add(new_people)
+    db.session.commit()
+
+    return jsonify({
+        "success":"People update successfully"
+    }), 201
+
 # DELETE ALL PEOPLE
 
 @api.route('/people/', methods=['DELETE'])
@@ -507,6 +602,39 @@ def post_planet():
         "msg":"Planet created successfully",
         "New planet":all_planets[len(all_planets)-1].serialize()
     }), 201
+
+# PUT PLANET
+
+@api.route('/planets/<int:planet_id>/', methods=['PUT'])
+def put_planet(planet_id):
+    name = request.json.get("name")
+    diameter = request.json.get("diameter")
+    gravity = request.json.get("gravity")
+    population = request.json.get("population")
+    terrain = request.json.get("terrain")
+    climate = request.json.get("climate")
+    planets = Planets.query.filter(Planets.id == planet_id).all()
+
+    if len(planets) == 0:
+        return jsonify({
+            "msg":"Planet not avaliable to update"
+        }), 404
+
+    new_planet = planets[0]
+    new_planet.name = name
+    new_planet.diameter = diameter
+    new_planet.gravity = gravity
+    new_planet.population = population
+    new_planet.terrain = terrain
+    new_planet.climate = climate
+
+    db.session.add(new_planet)
+    db.session.commit()
+
+    return jsonify({
+        "success":"Planet update successfully"
+    }), 201
+
 
 
 # DELETE PLANET
@@ -611,6 +739,39 @@ def post_specie():
         "New specie":all_species[len(all_species)-1].serialize()
     })
 
+# PUT SPECIE
+
+@api.route('/species/<int:specie_id>/', methods=['PUT'])
+def put_specie(specie_id):
+    classification = request.json.get("classification")
+    designation = request.json.get("designation")
+    languaje = request.json.get("languaje")
+    skin = request.json.get("skin")
+    eye_color = request.json.get("eye_color")
+    average_lifespan = request.json.get("average_lifespan")
+    species = Species.query.filter(Species.id == specie_id).all()
+
+    if len(species) == 0:
+        return jsonify({
+            "msg":"Specie not avaliable to update"
+        }), 404
+
+    new_specie = species[0]
+    new_specie.classification = classification
+    new_specie.designation = designation
+    new_specie.languaje = languaje
+    new_specie.skin = skin
+    new_specie.eye_color = eye_color
+    new_specie.average_lifespan = average_lifespan
+
+    db.session.add(new_specie)
+    db.session.commit()
+
+    return jsonify({
+        "success":"Specie update successfully"
+    })
+
+
 # DELETE ALL SPECIES
 
 @api.route('/species/', methods=['DELETE'])
@@ -710,6 +871,39 @@ def post_starship():
         "msg":"Starship created successfully",
         "New Starship":all_starships[len(all_starships)-1].serialize()
     })
+
+# PUT STARSHIPS
+
+@api.route('/starships/<int:starship_id>/', methods=['PUT'])
+def put_starship(starship_id):
+    model = request.json.get("model")
+    manufacturer = request.json.get("manufacturer")
+    lenght = request.json.get("lenght")
+    cargo_capacity = request.json.get("cargo_capacity")
+    consumables = request.json.get("consumables")
+    max_atmosphering_speed = request.json.get("max_atmosphering_speed")
+    starships = Starships.query.filter(Starships.id == starship_id).all()
+
+    if len(starships) == 0:
+        return jsonify({
+            "msg":"Starship not avaliable to update"
+        }), 404
+
+    new_starship = starships[0]
+    new_starship.model = model
+    new_starship.manufacturer = manufacturer
+    new_starship.lenght = lenght
+    new_starship.cargo_capacity = cargo_capacity
+    new_starship.consumables = consumables
+    new_starship.max_atmosphering_speed = max_atmosphering_speed
+
+    db.session.add(new_starship)
+    db.session.commit()
+
+    return jsonify({
+        "success":"Starship update successfully"
+    }), 201
+
 
 # DELETE ALL STARSHIPS
 
@@ -812,6 +1006,36 @@ def post_vehicle():
     return jsonify({
         "msg":"Vehicle created successfully",
         "New Starship":all_vehicles[len(all_vehicles)-1].serialize()
+    }), 201
+
+# PUT VEHICLE
+
+@api.route('/vehicles/<int:vehicle_id>/', methods=['PUT'])
+def put_vehicle(vehicle_id):
+    model = request.json.get("model")
+    manufacturer = request.json.get("manufacturer")
+    lenght = request.json.get("lenght")
+    cargo_capacity = request.json.get("cargo_capacity")
+    consumables = request.json.get("consumables")
+    vehicles = Vehicles.query.filter(Vehicles.id == vehicle_id).all()
+
+    if len(vehicles) == 0:
+        return jsonify({
+            "msg":"Vehicle not avaliable to update"
+        }), 404
+
+    new_vehicle = vehicles[0]
+    new_vehicle.model = model
+    new_vehicle.manufacturer = manufacturer
+    new_vehicle.lenght = lenght
+    new_vehicle.cargo_capacity = cargo_capacity
+    new_vehicle.consumables = consumables
+
+    db.session.add(new_vehicle)
+    db.session.commit()
+
+    return jsonify({
+        "success":"Vehicle update successfully"
     }), 201
 
 # DELETE ALL VEHICLES
