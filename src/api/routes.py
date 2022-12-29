@@ -42,12 +42,18 @@ def users():
 
 @api.route('/users/<int:user>/', methods=['GET'])
 def each_user(user):
-    user = User.query.filter(User.id == user).all()
-    each_user = user[0].serialize()
+    user = User.query.filter(User.id == user).first()
+
+    if not user is None:
+        
+        return jsonify({
+            "user":user.serialize()
+        }), 200
 
     return jsonify({
-        "user":each_user
-    }), 200
+                "msg":"user not found"
+            })
+
 
 # POST NEW USER
 
@@ -228,9 +234,6 @@ def post_favorite():
         "msg":"Favorite created successfully"
     })
 
-# PUT FAVORITE ######################## HACER DE ULTIMO
-
-
 
 # DELETE ALL FAVORITES
 
@@ -300,14 +303,15 @@ def films():
 def each_film(film):
     films = Films.query.filter(Films.id == film).first()
     
-    if films is None:
-        return jsonify({ # Verificar para solventar esta condición
-            "film":"Film not found"
-        }), 404
+    if not films is None:
+
+        return jsonify({
+                "film":films.serialize()
+            }), 201
 
     return jsonify({
-            "film":films
-        }), 201
+        "film":"Film not found"
+    }), 404
 
 
 # POST NEW FILM
@@ -434,14 +438,15 @@ def people():
 def each_people(peop):
     people = People.query.filter(People.id == peop).first()
 
-    if people is None:
+    if not people is None:
+
         return jsonify({
-            "msg":"people not found"
-        }), 404
+                "people":people.serialize()
+            }), 201
 
     return jsonify({
-            "people":people
-        }), 201
+        "msg":"people not found"
+    }), 404
 
 
 # POST NEW PEOPLE
@@ -564,12 +569,12 @@ def planets():
 
 @api.route('/planets/<int:planet>/', methods=['GET'])
 def each_planet(planet):
-    planets = Planets.query.filter(Planets.id == planet).all()
-    each_planet = planets[0].serialize()
+    planets = Planets.query.filter(Planets.id == planet).first()
 
-    if planet <= len(planets)+1: # Verificar para solventar esta condición
+    if not planets is None:
+
         return jsonify({
-            "planet":each_planet
+            "planet":planets.serialize()
         }), 200
     
     return jsonify({
@@ -700,12 +705,12 @@ def species():
 
 @api.route('/species/<int:specie>/')
 def each_specie(specie):
-    species = Species.query.filter(Species.id == specie).all()
-    each_specie = species[0].serialize()
+    species = Species.query.filter(Species.id == specie).first()
 
-    if specie <= len(species)+1: # Verificar para solventar esta condición
+    if not species is None:
+
         return jsonify({
-            "specie":each_specie
+            "specie":species.serialize()
         }), 200
     
     return jsonify({
@@ -833,12 +838,12 @@ def starships():
 
 @api.route('/starships/<int:starship>/')
 def each_starship(starship):
-    starships = Starships.query.filter(Starships.id == starship).all()
-    each_starship = starships[0].serialize()
+    starships = Starships.query.filter(Starships.id == starship).first()
 
-    if starship <= len(starships)+1: # Verificar para solventar esta condición
+    if not starships is None:
+
         return jsonify({
-            "starship":each_starship
+            "starship":starships.serialize()
         }), 200
     
     return jsonify({
@@ -970,12 +975,12 @@ def vehicles():
 
 @api.route('/vehicles/<int:vehicle>/')
 def each_vehicle(vehicle):
-    vehicles = Vehicles.query.filter(Vehicles.id == vehicle).all()
-    each_vehicle = vehicles[0].serialize()
+    vehicles = Vehicles.query.filter(Vehicles.id == vehicle).first()
 
-    if vehicle <= len(vehicles)+1: # Verificar para solventar esta condición
+    if not vehicles is None:
+
         return jsonify({
-            "vehicle":each_vehicle
+            "vehicle":vehicles.serialize()
         }), 200
     
     return jsonify({
