@@ -23,6 +23,7 @@ app.url_map.strict_slashes = False
 # JWT MANAGER
 
 app.config["JWT_SECRET_KEY"] = os.getenv("FLASK_APP_KEY")
+jwt = JWTManager(app)
 
 # database configuration
 db_url = os.getenv("DATABASE_URL")

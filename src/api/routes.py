@@ -4,6 +4,10 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 from flask import Flask, request, jsonify, url_for, Blueprint, jsonify
 from api.models import db, User, Favorites, Films, People, Planets, Species, Starships, Vehicles
 from api.utils import generate_sitemap, APIException
+from flask_jwt_extended import create_access_token, create_refresh_token # Son importador para la creación del token y el refresh del mismo
+from flask_jwt_extended import jwt_required # funciona para crear rutas privadas las cuales requieran de autorización
+from flask_jwt_extended import get_jwt_identity # me trae toda la información del token
+
 
 api = Blueprint('api', __name__)
 
@@ -18,6 +22,48 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+# POST SESSION // EN LA DOCUMENTACIÓN SE ENCUENTRAN LOS PASO A PASO
+
+@api.route('/login/', methods=['POST'])
+def login():
+    email = request.json.get("email")
+    password = request.json.get("password")
+    user = User.query.filter(User.email == email).first()
+
+    if user is None:
+        return jsonify({
+            "msg":"The user not exist, please try with valid user"
+        }), 404
+    
+    if user.password == password:
+        access_token = create_access_token(identity = user.id) # token de acceso, el cual se identifica con el id de cada usuario
+        refresh_token = create_refresh_token(identity = user.id) # token de refresco, el cual se identifica con el id de cada usuario
+        return jsonify({
+            "success":"Login successfully",
+            "access_tokken":access_token, # aquí se imprimen en el postman
+            "refresh_token":refresh_token # aquí se imprimen en el postman
+        }), 200
+
+    else:
+        return jsonify({
+            "msg":"invalid password, please try again"
+        })
+
+# JWT REQUIRED - PROTEGIENDO RUTAS
+# LO QUE PASA AQUÍ BASÍCAMENTE ES QUE PARA PODER ACCEDER A ESTA RUTA EN CONCRETO ES NECESARIO VALIDAR EL TOKEN DE ACCESO
+# EL CUAL TAMBIÉN CUENTA CON TIEMPO DE CADUCIDAD
+
+@api.route('/userdata/')
+@jwt_required() # automaticamente protege la ruta que le sigue
+def user_data():
+    user_id = get_jwt_identity() #me trae la info del token junto al id vinculado
+    user = User.query.get(user_id)
+    return jsonify({
+        "user":user.serialize() 
+    })
+
+        
 
 # ALL USERS
 
@@ -64,7 +110,6 @@ def post_user():
     is_active = request.json.get("is_active")
     post_user = User(email = email, password = password, is_active = is_active)
     users = User.query.filter(User.email == email).first()
-    all_users = User.query.filter(User.__tablename__ == "user").all()
 
 
     if not users is None:
@@ -330,7 +375,6 @@ def post_film():
     episode_id = request.json.get("episode_id")
     post_film = Films(title = title, director = director, producer = producer, release_date = release_date, episode_id = episode_id)
     films = Films.query.filter(Films.title == title and Films.director == director and Films.producer == producer and Films.release_date == release_date and Films.episode_id == episode_id ).first()
-    all_films = Films.query.filter(Films.__tablename__ == "films").all()
     
 
     if not films is None:
@@ -465,7 +509,6 @@ def post_people():
     birth_year = request.json.get("birth_year")
     post_people = People(name = name, gender = gender, height = height, skin_color = skin_color, eyes_color = eyes_color, birth_year = birth_year)
     people = People.query.filter(People.name == name and People.gender == gender and People.height == height and People.skin_color == skin_color and People.eyes_color == eyes_color and People.birth_year == birth_year).first()
-    all_people = People.query.filter(People.__tablename__ == "people").all()
 
     if not people is None:
         return jsonify({
@@ -597,7 +640,6 @@ def post_planet():
     climate = request.json.get("climate")
     post_planet = Planets(name = name, diameter = diameter, gravity = gravity, population = population, terrain = terrain, climate = climate)
     planets = Planets.query.filter(Planets.name == name and Planets.diameter == diameter and Planets.population == population and Planets.terrain == terrain and Planets.climate == climate).first()
-    all_planets = Planets.query.filter(Planets.__tablename__ == "planets").all()
 
     if not planets is None:
         return jsonify({
@@ -732,7 +774,6 @@ def post_specie():
     average_lifespan = request.json.get("average_lifespan")
     post_specie = Species(classification = classification, designation = designation, languaje = languaje, skin_color = skin_color, eye_color = eye_color, average_lifespan = average_lifespan)
     species = Species.query.filter(Species.classification == classification and Species.designation == designation and Species.languaje == languaje and Species.skin_color == skin_color and Species.eye_color == eye_color and Species.average_lifespan == average_lifespan).first()
-    all_species = Species.query.filter(Species.__tablename__ == "species").all()
 
     if not species is None:
         return jsonify({
@@ -864,7 +905,6 @@ def post_starship():
     max_atmosphering_speed = request.json.get("max_atmosphering_speed")
     post_starship = Starships(model = model, manufacturer = manufacturer, lenght = lenght, cargo_capacity = cargo_capacity, consumables = consumables, max_atmosphering_speed = max_atmosphering_speed)
     starships = Starships.query.filter(Starships.model == model and Starships.manufacturer == manufacturer and Starships.lenght == lenght and Starships.cargo_capacity == cargo_capacity and Starships.consumables == consumables and Starships.max_atmosphering_speed == max_atmosphering_speed).first()
-    all_starships = Starships.query.filter(Starships.__tablename__ == "starships").all()
 
     if not starships is None:
         return jsonify({
@@ -999,7 +1039,6 @@ def post_vehicle():
     consumables = request.json.get("consumables")
     post_vehicle = Vehicles(model = model, manufacturer = manufacturer, lenght = lenght, cargo_capacity = cargo_capacity, consumables = consumables)
     vehicles = Vehicles.query.filter(Vehicles.model == model and Vehicles.manufacturer == manufacturer and Vehicles.lenght == lenght and Vehicles.cargo_capacity == cargo_capacity).first()
-    all_vehicles = Vehicles.query.filter(Vehicles.__tablename__ == "vehicles").all()
 
     if not vehicles is None:
         return jsonify({
