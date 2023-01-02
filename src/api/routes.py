@@ -7,9 +7,12 @@ from api.utils import generate_sitemap, APIException
 from flask_jwt_extended import create_access_token, create_refresh_token # Son importador para la creación del token y el refresh del mismo
 from flask_jwt_extended import jwt_required # funciona para crear rutas privadas las cuales requieran de autorización
 from flask_jwt_extended import get_jwt_identity # me trae toda la información del token
+from flask_bcrypt import Bcrypt
 
 
 api = Blueprint('api', __name__)
+
+cripto = Bcrypt(Flask(__name__))
 
 # 4 funciones genericas para el crud : 1 para post, 1 para el get, otra el delete, y put 
 
@@ -36,6 +39,7 @@ def login():
             "msg":"The user not exist, please try with valid user"
         }), 404
     
+    #*/+++++if cripto.check_password_hash(user.password, password): # en lugar de generar una validación común poco segura (texto a texto) se valida pero de manera encriptada. Primero pasando como parametro la password de la base de datos en el usar, y luego la que viene desde la petición.
     if user.password == password:
         access_token = create_access_token(identity = user.id) # token de acceso, el cual se identifica con el id de cada usuario
         refresh_token = create_refresh_token(identity = user.id) # token de refresco, el cual se identifica con el id de cada usuario
@@ -50,20 +54,36 @@ def login():
             "msg":"invalid password, please try again"
         })
 
+
+
 # JWT REQUIRED - PROTEGIENDO RUTAS
 # LO QUE PASA AQUÍ BASÍCAMENTE ES QUE PARA PODER ACCEDER A ESTA RUTA EN CONCRETO ES NECESARIO VALIDAR EL TOKEN DE ACCESO
 # EL CUAL TAMBIÉN CUENTA CON TIEMPO DE CADUCIDAD
 
-@api.route('/userdata/')
-@jwt_required() # automaticamente protege la ruta que le sigue
+@api.route('/userdata/', methods=['GET'])
+@jwt_required() # automaticamente protege la ruta la cual se le indique
 def user_data():
-    user_id = get_jwt_identity() #me trae la info del token junto al id vinculado
-    user = User.query.get(user_id)
+    user_id = get_jwt_identity() #me trae la info del token junto al id vinculado (identity = user.id), por lo que se puede saber que usuario está haciendo la petición y restringir a que recursos ese usuario va a tener acceso
+    user = User.query.get(user_id) # con este id solo se accede a la información de ese usuario y de más nadie
     return jsonify({
         "user":user.serialize() 
     })
 
-        
+# UPDATE PASSWORD
+
+@api.route('/updatepassword/', methods=['PATCH'])
+def update_password():
+    update_password = request.json.get("password") # traemos la info de la password del body de la petición, que la clave que se va a actualizar
+    user_id = get_jwt_identity() # identidad del token
+    user = User.query.get(user_id) # se trae la data de ese user, que se consigue con la identidad del token
+    user.password = cripto.generate_password_hash(password).decode("utf-8")  # se actualiza la clave de una vez encriptada, la función en password encripta la clave, convirtiendola en un número largo y complejo
+    db.session.add(user) # se guarda el user con la información actualizada y se hace el commit
+    db.session.commit()
+
+    return jsonify({
+        "success":"Password update"
+    }), 200
+
 
 # ALL USERS
 
@@ -108,7 +128,7 @@ def post_user():
     email = request.json.get("email")
     password = request.json.get("password")
     is_active = request.json.get("is_active")
-    post_user = User(email = email, password = password, is_active = is_active)
+    post_user = User(is_active = is_active, email = email, password = cripto.generate_password_hash(password).decode("utf-8"))
     users = User.query.filter(User.email == email).first()
 
 
