@@ -18,7 +18,8 @@ cripto = Bcrypt(Flask(__name__))
 
 # 4 funciones genericas para el crud : 1 para post, 1 para el get, otra el delete, y put
 
-# POST SESSION // EN LA DOCUMENTACIÓN SE ENCUENTRAN LOS PASO A PASO
+
+# LOGIN SESSION // EN LA DOCUMENTACIÓN SE ENCUENTRAN LOS PASO A PASO
 
 @api.route('/login/', methods=['POST'])
 def login():
@@ -61,7 +62,7 @@ def user_data():
         "user":user.serialize() 
     })
 
-# LOGOUT 
+# LOGOUT SESSION
 
 @api.route('/logout/', methods=['POST'])
 @jwt_required() # es jwt_required porque solo hacen logout los que tienen sesión iniciada
@@ -192,7 +193,7 @@ def delete_all_users():
         db.session.commit()
 
     return jsonify({
-        "msg":"all users deleted"
+        "msg":"all users has been deleted"
     }), 201
 
 # DELETE USER
@@ -325,7 +326,7 @@ def delete_all_favorites():
         db.session.commit()
 
     return jsonify({
-        "msg":"all favorites deleted"
+        "msg":"all favorites has been deleted"
     }), 201
 
 
@@ -460,7 +461,7 @@ def delete_all_films():
         db.session.commit()
 
     return jsonify({
-        "msg":"all films deleted"
+        "msg":"all films has been deleted"
     }), 201
 
 
@@ -542,8 +543,7 @@ def post_people():
     db.session.commit()
 
     return jsonify({
-        "msg":"People created successfully",
-        "New people":all_people[len(all_people)-1].serialize()
+        "msg":"People created successfully"
     }), 201
 
 # PUT PEOPLE
@@ -595,7 +595,7 @@ def delete_all_people():
         db.session.commit()
 
     return jsonify({
-        "msg":"all species deleted"
+        "msg":"all people has been deleted"
     }), 201
 
 # DELETE PEOPLE
@@ -746,7 +746,7 @@ def delete_all_planets():
         db.session.commit()
 
     return jsonify({
-        "msg":"all species deleted"
+        "msg":"all planets has been deleted"
     }), 201
 
 
@@ -860,7 +860,7 @@ def delete_all_species():
         db.session.commit()
 
     return jsonify({
-        "msg":"all species deleted"
+        "msg":"all species has been deleted"
     }), 201
 
 # DELETE SPECIE
@@ -991,7 +991,7 @@ def delete_all_starships():
         db.session.commit()
 
     return jsonify({
-        "msg":"all starships deleted"
+        "msg":"all starships has been deleted"
     }), 201
 
 # DELETE STARSHIP
@@ -1122,7 +1122,7 @@ def delete_all_vehicles():
         db.session.commit()
 
     return jsonify({
-        "msg":"all vehicles deleted"
+        "msg":"all vehicles has been deleted"
     }), 201
 
 # DELETE VEHICLE
