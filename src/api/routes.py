@@ -2,11 +2,13 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint, jsonify
-from api.models import db, User, Favorites, Films, People, Planets, Species, Starships, Vehicles
+from api.models import db, User, Favorites, Films, People, Planets, Species, Starships, Vehicles, TokenBlocklist
 from api.utils import generate_sitemap, APIException
 from flask_jwt_extended import create_access_token, create_refresh_token # Son importador para la creación del token y el refresh del mismo
 from flask_jwt_extended import jwt_required # funciona para crear rutas privadas las cuales requieran de autorización
 from flask_jwt_extended import get_jwt_identity # me trae toda la información del token
+from flask_jwt_extended import get_jwt # para el cierre de sesión
+from datetime import datetime, timezone # para el cierre de sesión
 from flask_bcrypt import Bcrypt
 
 
@@ -14,17 +16,7 @@ api = Blueprint('api', __name__)
 
 cripto = Bcrypt(Flask(__name__))
 
-# 4 funciones genericas para el crud : 1 para post, 1 para el get, otra el delete, y put 
-
-
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
-
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
-
-    return jsonify(response_body), 200
+# 4 funciones genericas para el crud : 1 para post, 1 para el get, otra el delete, y put
 
 # POST SESSION // EN LA DOCUMENTACIÓN SE ENCUENTRAN LOS PASO A PASO
 
@@ -39,8 +31,8 @@ def login():
             "msg":"The user not exist, please try with valid user"
         }), 404
     
-    #*/+++++if cripto.check_password_hash(user.password, password): # en lugar de generar una validación común poco segura (texto a texto) se valida pero de manera encriptada. Primero pasando como parametro la password de la base de datos en el usar, y luego la que viene desde la petición.
-    if user.password == password:
+    #if user.password == password:
+    if cripto.check_password_hash(user.password, password): # en lugar de generar una validación común poco segura (texto a texto) se valida pero de manera encriptada. Primero pasando como parametro la password de la base de datos en el usar, y luego la que viene desde la petición.
         access_token = create_access_token(identity = user.id) # token de acceso, el cual se identifica con el id de cada usuario
         refresh_token = create_refresh_token(identity = user.id) # token de refresco, el cual se identifica con el id de cada usuario
         return jsonify({
@@ -69,6 +61,17 @@ def user_data():
         "user":user.serialize() 
     })
 
+# LOGOUT 
+
+@api.route('/logout/', methods=['POST'])
+@jwt_required() # es jwt_required porque solo hacen logout los que tienen sesión iniciada
+def logout():
+    jti = get_jwt()["jti"] # se obtiene el identificador del token
+    now = datetime.now(timezone.utc) # se obtiene la hora
+    db.session.add(TokenBlocklist(jti=jti, created_at=now)) # se genera el registro del token bloqueado y se guarda en la base de datos
+    db.session.commit()
+    return jsonify(msg="JWT revoked")
+
 # UPDATE PASSWORD
 
 @api.route('/updatepassword/', methods=['PATCH'])
@@ -76,7 +79,7 @@ def update_password():
     update_password = request.json.get("password") # traemos la info de la password del body de la petición, que la clave que se va a actualizar
     user_id = get_jwt_identity() # identidad del token
     user = User.query.get(user_id) # se trae la data de ese user, que se consigue con la identidad del token
-    user.password = cripto.generate_password_hash(password).decode("utf-8")  # se actualiza la clave de una vez encriptada, la función en password encripta la clave, convirtiendola en un número largo y complejo
+    user.password = cripto.generate_password_hash(password).decode("utf-8")  # se actualiza la clave de una vez encriptada, la función en password encripta la clave, convirtiendola en un número largo y complejo, el cual ya no te deja acceder con la clave como tal si no con la clave encriptada
     db.session.add(user) # se guarda el user con la información actualizada y se hace el commit
     db.session.commit()
 
@@ -121,7 +124,7 @@ def each_user(user):
             })
 
 
-# POST NEW USER
+# POST NEW USER (REGISTER)
 
 @api.route('/users/', methods=['POST'])
 def post_user():

@@ -38,6 +38,11 @@ class User(db.Model):
             "user_id":self.user_id,
         } """
 
+class TokenBlocklist(db.Model): # traido de la docuemntación de jwt flask
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, nullable=False)
+
 class Films(db.Model):
     __tablename__ = "films"
     id = db.Column(db.Integer, primary_key = True)

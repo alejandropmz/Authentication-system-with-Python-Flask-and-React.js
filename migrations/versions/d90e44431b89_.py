@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: ffe339311102
+Revision ID: d90e44431b89
 Revises: 
-Create Date: 2023-01-02 00:46:15.311576
+Create Date: 2023-01-03 00:18:30.353987
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'ffe339311102'
+revision = 'd90e44431b89'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -67,6 +67,15 @@ def upgrade():
     sa.Column('max_atmosphering_speed', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('token_blocklist',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('jti', sa.String(length=36), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    with op.batch_alter_table('token_blocklist', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('ix_token_blocklist_jti'), ['jti'], unique=False)
+
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
@@ -100,6 +109,10 @@ def downgrade():
     op.drop_table('favorites')
     op.drop_table('vehicles')
     op.drop_table('user')
+    with op.batch_alter_table('token_blocklist', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('ix_token_blocklist_jti'))
+
+    op.drop_table('token_blocklist')
     op.drop_table('starships')
     op.drop_table('species')
     op.drop_table('planets')
