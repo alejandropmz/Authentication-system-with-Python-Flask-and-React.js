@@ -125,7 +125,7 @@ class Species(db.Model):
     languaje = db.Column(db.String(100), nullable = False)
     skin_color = db.Column(db.String(100), nullable = False)
     eye_color = db.Column(db.String(50), nullable = False)
-    average_lifespan = db.Column(db.Integer, nullable = False) # cambiar a string
+    average_lifespan = db.Column(db.String(100), nullable = False)
 
     def __repr__(self):
         return f'<Species {self.id}>'
@@ -174,7 +174,7 @@ class Vehicles(db.Model):
     manufacturer = db.Column(db.String(100), nullable = False) 
     lenght = db.Column(db.Integer, nullable = False)
     cargo_capacity = db.Column(db.Integer, nullable = False)
-    consumables = db.Column(db.Integer, nullable = False)  # cambiar a string
+    consumables = db.Column(db.String(100), nullable = False)
 
     def __repr__(self):
         return f'<Vehicles {self.id}>'

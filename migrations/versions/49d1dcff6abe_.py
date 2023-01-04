@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d90e44431b89
+Revision ID: 49d1dcff6abe
 Revises: 
-Create Date: 2023-01-03 00:18:30.353987
+Create Date: 2023-01-04 03:30:37.322207
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd90e44431b89'
+revision = '49d1dcff6abe'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -54,7 +54,7 @@ def upgrade():
     sa.Column('languaje', sa.String(length=100), nullable=False),
     sa.Column('skin_color', sa.String(length=100), nullable=False),
     sa.Column('eye_color', sa.String(length=50), nullable=False),
-    sa.Column('average_lifespan', sa.Integer(), nullable=False),
+    sa.Column('average_lifespan', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('starships',
@@ -90,7 +90,7 @@ def upgrade():
     sa.Column('manufacturer', sa.String(length=100), nullable=False),
     sa.Column('lenght', sa.Integer(), nullable=False),
     sa.Column('cargo_capacity', sa.Integer(), nullable=False),
-    sa.Column('consumables', sa.Integer(), nullable=False),
+    sa.Column('consumables', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('favorites',
